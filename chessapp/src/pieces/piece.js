@@ -1,15 +1,9 @@
 import styled from '@emotion/styled';
 import React from 'react';
 
-const StyledPiece = styled.button({
+const ChessPiece = styled.svg({
     border: '0',
     backgroundColor: 'transparent',
-    width: '100%',
-    height: '100%',
-    margin: 'auto',
-});
-
-const ChessPiece = styled.svg({
     width: '100%',
     height: '100%',
     padding: '0',
@@ -155,4 +149,3 @@ class Piece extends React.Component {
 }
 
 export default Piece;
-export { StyledPiece };
