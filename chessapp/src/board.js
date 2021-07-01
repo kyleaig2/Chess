@@ -11,6 +11,7 @@ const BoardContainer = styled.div({
 
 const BoardRow = styled.div({
     display: 'table-row',
+    height: '5em',
 });
 
 class Board extends React.Component {
