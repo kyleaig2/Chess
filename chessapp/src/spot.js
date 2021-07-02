@@ -8,8 +8,9 @@ const SpotButton = styled.div(props => ({
     height: 'inherit',
     border: '1px solid black',
     padding: '0',
-    margin: '0',
     display: 'table-cell',
+    textAlign: 'center',
+    verticalAlign: 'middle'
     })
 );
 
