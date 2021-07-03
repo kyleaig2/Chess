@@ -6,7 +6,6 @@ const BoardContainer = styled.div({
     display: 'table',
     borderCollapse: 'collapse',
     margin: 'auto',
-    // verticalAlign: 'middle',
 });
 
 const BoardRow = styled.div({

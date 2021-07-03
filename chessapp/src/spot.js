@@ -2,7 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import Piece from './pieces/piece';
 
-const SpotButton = styled.div(props => ({
+const SpotCell = styled.div(props => ({
     backgroundColor: props.black ? '#eeefff' : '#fff',
     width: '5em',
     height: 'inherit',
@@ -35,7 +35,7 @@ class Spot extends React.Component {
             piece = {
                 type: 'rook',
                 black: black,
-            }    
+            }
         }
         else if (cell[0] === 'b' || cell[0] === 'g') {
             piece = {
@@ -84,9 +84,9 @@ class Spot extends React.Component {
 
     render() {
         return (
-            <SpotButton black={this.props.black} title={this.props.cell}>
+            <SpotCell black={this.props.black} title={this.props.cell}>
                 {this.renderPiece()}
-            </SpotButton>
+            </SpotCell>
         );
     }
 }
