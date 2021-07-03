@@ -87,10 +87,31 @@ class Board extends React.Component {
     }
 
     handleClick(i, j) {
-        let spot = this.state.board[i][j];
-        console.log(`clicked on spot(${i}, ${j})`);
-        console.log(spot);
-        this.setState({selected: spot});
+        let oldSpot = this.state.selected;
+        let newSpot = this.state.board[i][j];
+        let newBoard = [...this.state.board];
+        
+        // valid moves:
+        let validMove = true;
+        if (oldSpot === newSpot) { // Deselect if same spot
+            validMove = false;
+            newSpot = {};
+        }
+        else if (oldSpot.piece && newSpot.piece) { // piece 1 vs piece 2
+            validMove = oldSpot.piece.black !== newSpot.piece.black; 
+        }
+        else { // piece vs empty spot
+            validMove = oldSpot.piece && !newSpot.piece;
+        }
+        
+        if (validMove) {  // Moving
+            newBoard[i][j].piece = oldSpot.piece;
+            newBoard[oldSpot.row][oldSpot.col].piece = null;
+            newSpot = {};
+            // TODO: next turn
+        }
+
+        this.setState({board: newBoard, selected: newSpot});
     }
 
     renderRow(i) {
@@ -121,16 +142,20 @@ class Board extends React.Component {
 
     render() {
         return (
-            <BoardContainer>
-                {this.renderRow(7)}
-                {this.renderRow(6)}
-                {this.renderRow(5)}
-                {this.renderRow(4)}
-                {this.renderRow(3)}
-                {this.renderRow(2)}
-                {this.renderRow(1)}
-                {this.renderRow(0)}
-            </BoardContainer>
+            <div className='game'>
+                <BoardContainer>
+                    {this.renderRow(7)}
+                    {this.renderRow(6)}
+                    {this.renderRow(5)}
+                    {this.renderRow(4)}
+                    {this.renderRow(3)}
+                    {this.renderRow(2)}
+                    {this.renderRow(1)}
+                    {this.renderRow(0)}
+                </BoardContainer>
+                Selected: {JSON.stringify(this.state.selected)}
+            </div>
+
         );
     }
 }

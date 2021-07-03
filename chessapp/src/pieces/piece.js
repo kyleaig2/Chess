@@ -110,31 +110,17 @@ function King(props) {
     );
 }
 
-class Piece extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            captured: false,
-            moves: []
-        }
+function Piece(props) {
+    const pieces = {
+        'pawn': <Pawn black={props.black} />,
+        'rook': <Rook black={props.black} />,
+        'knight': <Knight black={props.black} />,
+        'bishop': <Bishop black={props.black} />,
+        'king': <King black={props.black} />,
+        'queen': <Queen black={props.black} />
     }
-
-    render() {
-        const pieces = {
-            'pawn': <Pawn black={this.props.black} />,
-            'rook': <Rook black={this.props.black} />,
-            'knight': <Knight black={this.props.black} />,
-            'bishop': <Bishop black={this.props.black} />,
-            'king': <King black={this.props.black} />,
-            'queen': <Queen black={this.props.black} />
-        }
-        if (this.props.type in pieces) {
-            return pieces[this.props.type];
-        }
-        else {
-            return null;
-        }
-    }
-}
+    let result = props.type in pieces ? pieces[props.type] : null;
+    return result;
+};
 
 export default Piece;
