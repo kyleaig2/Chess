@@ -3,22 +3,39 @@ import styled from '@emotion/styled';
 import Spot from './spot';
 
 const BoardContainer = styled.div({
-    display: 'table',
-    borderCollapse: 'collapse',
-    margin: 'auto',
+    // display: 'block',
+    // margin: '1% 25%',
+    width: '50%',
+    margin: '0 auto',
 });
 
 const BoardRow = styled.div({
-    display: 'table-row',
-    height: '5em',
+    display: 'block',
+    height: 'fit-content',
+    padding: '0',
 });
 
-class Board extends React.Component {
+const StatusBar = styled.ul({
+    padding: '0',
+    margin: '0',
+    listStyle: 'none',
+    position: 'absolute',
+    top: '1em',
+    left: '1em',
+    width: '20%',
+});
+
+class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             board: [],
             selected: {},
+            whiteTurn: true,
+            whiteCheck: false,
+            blackCheck: false,
+            whiteCheckMate: false,
+            blackCheckMate: false,
         }
         this.initBoard();
     }
@@ -90,10 +107,11 @@ class Board extends React.Component {
         let oldSpot = this.state.selected;
         let newSpot = this.state.board[i][j];
         let newBoard = [...this.state.board];
+        let whiteTurn = this.state.whiteTurn;
         
-        // valid moves:
+        // Calculate move validity:
         let validMove = true;
-        if (oldSpot === newSpot) { // Deselect if same spot
+        if (oldSpot === newSpot || (!oldSpot.piece && !newSpot.piece)) { // Deselect if same spot
             validMove = false;
             newSpot = {};
         }
@@ -108,10 +126,10 @@ class Board extends React.Component {
             newBoard[i][j].piece = oldSpot.piece;
             newBoard[oldSpot.row][oldSpot.col].piece = null;
             newSpot = {};
-            // TODO: next turn
+            whiteTurn = !whiteTurn;
         }
 
-        this.setState({board: newBoard, selected: newSpot});
+        this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
     }
 
     renderRow(i) {
@@ -131,18 +149,37 @@ class Board extends React.Component {
     
     renderSpot(i, j) {
         const spot = this.state.board[i][j];
-        const row = spot.row;
-        const col = spot.col;
-        const black = spot.black;
         const piece = spot.piece;
+        const row = spot.row, col = spot.col;
+        const black = spot.black;
+
         const letters = 'abcdefgh';
         let name = letters[col] + (row + 1);
-        return <Spot key={name} black={black} cell={name} piece={piece} onClick={() => this.handleClick(i, j)}/>
+        let disabled = false;
+        
+        // Not turn
+        if (!this.state.selected.piece) { // If no piece is selected
+            if (piece) { 
+                disabled = this.state.whiteTurn === piece.black; // Not your turn
+            }
+            else { // No random cell clicking
+                disabled = true;
+            }
+        }
+        
+        return <Spot key={name} black={black} 
+                cell={name} piece={piece} 
+                onClick={() => this.handleClick(i, j)}
+                disabled={disabled}/>
     }
 
     render() {
         return (
             <div className='game'>
+                <StatusBar>
+                    <li>{this.state.whiteTurn ? 'White' : 'Black'}'s Turn</li>
+                    <li>Selected: {JSON.stringify(this.state.selected)}</li>
+                </StatusBar>
                 <BoardContainer>
                     {this.renderRow(7)}
                     {this.renderRow(6)}
@@ -153,11 +190,9 @@ class Board extends React.Component {
                     {this.renderRow(1)}
                     {this.renderRow(0)}
                 </BoardContainer>
-                Selected: {JSON.stringify(this.state.selected)}
             </div>
-
         );
     }
 }
 
-export default Board;
+export default Game;
