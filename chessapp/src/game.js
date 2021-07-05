@@ -4,9 +4,9 @@ import Spot from './spot';
 
 const BoardContainer = styled.div({
     // display: 'block',
-    // margin: '1% 25%',
+    height: '50%',
     width: '50%',
-    margin: '0 auto',
+    margin: 'auto',
 });
 
 const BoardRow = styled.div({
@@ -22,7 +22,8 @@ const StatusBar = styled.ul({
     position: 'absolute',
     top: '1em',
     left: '1em',
-    width: '20%',
+    width: '22%',
+    overflowWrap: 'break-word',
 });
 
 class Game extends React.Component {
@@ -60,47 +61,29 @@ class Game extends React.Component {
 
     initPiece(i, j) {
         let black = i > 5;
-        let piece = null;
+        let type = '';
         if (i > 1 && i < 6) {
             return null;
         }
         if (i === 1 || i === 6) {
-            piece = {
-                type: 'pawn',
-                black: black,
-            }
+            type = 'pawn';
         }
         else if (j === 0 || j === 7) {
-            piece = {
-                type: 'rook',
-                black: black,
-            }
+            type = 'rook';
         }
         else if (j === 1 || j === 6) {
-            piece = {
-                type: 'knight',
-                black: black,
-            }
+            type = 'knight';
         }
         else if (j === 2 || j === 5) {
-            piece = {
-                type: 'bishop',
-                black: black,
-            }
+            type = 'bishop';
         }
         else if (j === 3) {
-            piece = {
-                type: 'queen',
-                black: black,
-            }
+            type = 'queen';
         }
         else if (j === 4) {
-            piece = {
-                type: 'king',
-                black: black,
-            }
+            type = 'king';
         }
-        return piece;
+        return {type: type, black: black, hasMoved: false};
     }
 
     handleClick(i, j) {
@@ -110,19 +93,19 @@ class Game extends React.Component {
         let whiteTurn = this.state.whiteTurn;
         
         // Calculate move validity:
-        let validMove = true;
+        let validMove = false;
+        if (oldSpot.piece) {
+            validMove = this.getMoveSet(oldSpot).includes(newSpot);
+            if (!validMove) {
+                newSpot = {};
+            }
+        }
         if (oldSpot === newSpot || (!oldSpot.piece && !newSpot.piece)) { // Deselect if same spot
             validMove = false;
             newSpot = {};
         }
-        else if (oldSpot.piece && newSpot.piece) { // piece 1 vs piece 2
-            validMove = oldSpot.piece.black !== newSpot.piece.black; 
-        }
-        else { // piece vs empty spot
-            validMove = oldSpot.piece && !newSpot.piece;
-        }
-        
         if (validMove) {  // Moving
+            oldSpot.piece.hasMoved = true;
             newBoard[i][j].piece = oldSpot.piece;
             newBoard[oldSpot.row][oldSpot.col].piece = null;
             newSpot = {};
@@ -130,6 +113,150 @@ class Game extends React.Component {
         }
 
         this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
+    }
+
+    getBishopMoves(spot) {
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let row = spot.row, col = spot.col;
+        let board = this.state.board;
+        let moves = [];
+
+        for (let i = 1; i <= 2; i++) {
+            let pathRow = board[row + pDir];
+            let clearA = true, clearB = true;
+
+            let pathA = board[row][col], pathB = board[row][col];
+            let colA = col, colB = col;
+            while (pathRow !== undefined) {
+                pathA = pathRow[colA += 1];
+                pathB = pathRow[colB -= 1];
+                if (pathA !== undefined && clearA) {
+                    if (!pathA.piece) {
+                        moves.push(pathA);
+                    }
+                    else if (pathA.piece.black !== piece.black) {
+                        moves.push(pathA);
+                    }
+                    // Need check avoidance logic
+                    else {
+                        clearA = false;
+                    }
+                }
+
+                if (pathB !== undefined && clearB) {
+                    if (!pathB.piece) {
+                        moves.push(pathB);
+                    }
+                    else if (pathB.piece.black !== piece.black) {
+                        moves.push(pathB);
+                    }
+                    // Need check avoidance logic
+                    else {
+                        clearB = false;
+                    }
+                }
+                pathRow = board[board.indexOf(pathRow) + pDir];
+            }
+            pDir *= -1;
+        }
+        return moves;
+    }
+
+    getKnightMoves(spot) {
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let row = spot.row, col = spot.col;
+        let board = this.state.board;
+        let moves = [], temp = [];
+
+        for (let i = 0; i < 2; i++) { // Advancing and Retreating
+            let pathRow = board[row + pDir * 2];
+            if (pathRow && pathRow[col + 1] !== undefined) {
+                temp.push(pathRow[col + 1]);
+            }
+            if (pathRow && pathRow[col - 1] !== undefined) {
+                temp.push(pathRow[col - 1]);
+            }
+            pathRow = board[row + pDir];
+            if (pathRow && pathRow[col + 2] !== undefined) {
+                temp.push(pathRow[col + 2]);
+            }
+            if (pathRow && pathRow[col - 2] !== undefined) {
+                temp.push(pathRow[col - 2]);
+            }
+            pDir *= -1;
+        }
+        // Loading moves
+        [...temp].forEach(spot => {
+            if (!spot.piece) {
+                moves.push(spot);
+            }
+            else if (piece.black !== spot.piece.black) {
+                moves.push(spot);
+            }
+        });
+        return moves;
+    }
+
+    getPawnMoves(spot) {
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let row = spot.row, col = spot.col;
+        let board = this.state.board;
+        let moves = [], path = {};
+
+        // Normal advancing
+        let i = 0;
+        path = board[row + pDir][col];
+        while (!path.piece && i <= 1) {
+            moves.push(path);
+            if (piece.hasMoved) {
+                break;
+            }
+            i++;
+            path = board[path.row + pDir * i][path.col];
+        }
+        // Pawn attack spots
+        let atkSpots = [];
+        if (row + pDir in board) { // out of bounds checks
+            if (col + 1 in board[row + pDir]) {
+                atkSpots.push(board[row + pDir][col + 1])
+            }
+            if (col - 1 in board[row + pDir]) {
+                atkSpots.push(board[row + pDir][col - 1])
+            }
+        }
+        atkSpots.forEach(targetSpot => {
+            if (targetSpot.piece) {
+                if (targetSpot.piece.black !== piece.black) {
+                    moves.push(targetSpot);
+                }
+            }
+        });
+        return moves;
+    }
+
+    getMoveSet(spot) {
+        let piece = spot.piece;
+        let type = piece.type;
+        let moves = [];
+        
+        switch (type) {
+            case 'king': 
+                break;
+            case 'bishop':
+                moves = this.getBishopMoves(spot);
+                break;
+            case 'knight':
+                moves = this.getKnightMoves(spot);
+                break;
+            default:
+                moves = this.getPawnMoves(spot);
+                break;
+        }
+        console.log(moves);
+        return moves;
     }
 
     renderRow(i) {
@@ -189,6 +316,14 @@ class Game extends React.Component {
                     {this.renderRow(2)}
                     {this.renderRow(1)}
                     {this.renderRow(0)}
+                    {/* {this.renderRow(0)}
+                    {this.renderRow(1)}
+                    {this.renderRow(2)}
+                    {this.renderRow(3)}
+                    {this.renderRow(4)}
+                    {this.renderRow(5)}
+                    {this.renderRow(6)}
+                    {this.renderRow(7)} */}
                 </BoardContainer>
             </div>
         );
