@@ -117,11 +117,28 @@ class Game extends React.Component {
     }
 
     getKingMoves(spot) {
-        //
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let board = this.state.board;
+        let moves = [];
+
+        let pathRow = board[spot.row];
+        // for (let i = 0; i < 2; i++) {}
+        while (pathRow !== undefined) {
+
+        }
+        // }
+
+        return moves;
     }
 
     getQueenMoves(spot) {
+        let piece = spot.piece;
+        // let pDir = piece.black ? -1 : 1;
+        // let board = this.state.board;
+        let moves = [];
         //
+        return moves;
     }
 
     getRookMoves(spot) {
