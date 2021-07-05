@@ -130,34 +130,40 @@ class Game extends React.Component {
         let board = this.state.board;
         let moves = [];
 
-        // for (let i = 0; i < 2; i ++) {
-        let pathRow = board[spot.row], path = spot;
-        let clearA = true, clearB = false;
-        let pCol = spot.col;
-        while (pathRow !== undefined) {
-            if (clearA) {
-                path = pathRow[pCol += pDir];
-            }
-            else if (clearB) {
-                path = pathRow[spot.col];
-            }
-
-            if (path !== undefined && (clearA || clearB)) {
-                if (!path.piece) {
-                    moves.push(path);
+        for (let i = 0; i < 2; i++) {
+            let pathRow = board[spot.row], path = spot;
+            let clearA = true, clearB = false;
+            let pCol = spot.col;
+            while (pathRow !== undefined) {
+                if (clearA) {
+                    path = pathRow[pCol += pDir];
                 }
-                else if (path.piece.black !== piece.black) {
-                    moves.push(path);
-                    clearA = false;
+                else if (clearB) {
+                    path = pathRow[spot.col];
+                }
+
+                if (path !== undefined && (clearA || clearB)) {
+                    if (!path.piece) {
+                        moves.push(path);
+                    }
+                    else if (path.piece.black !== piece.black) {
+                        moves.push(path);
+                        clearA = false;
+                    }
+                    else {
+                        clearB = clearA;
+                        clearA = false;
+                    }
                 }
                 else {
                     clearB = clearA;
                     clearA = false;
                 }
+                if (!clearA) {
+                    pathRow = board[board.indexOf(pathRow) + pDir];
+                }
             }
-            if (!clearA) {
-                pathRow = board[board.indexOf(pathRow) + pDir];
-            }
+            pDir *= -1;
         }
         return moves;
     }
