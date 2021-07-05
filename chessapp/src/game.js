@@ -66,7 +66,8 @@ class Game extends React.Component {
             return null;
         }
         if (i === 1 || i === 6) {
-            type = 'pawn';
+            // type = 'pawn';
+            return null;
         }
         else if (j === 0 || j === 7) {
             type = 'rook';
@@ -115,6 +116,52 @@ class Game extends React.Component {
         this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
     }
 
+    getKingMoves(spot) {
+        //
+    }
+
+    getQueenMoves(spot) {
+        //
+    }
+
+    getRookMoves(spot) {
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let board = this.state.board;
+        let moves = [];
+
+        // for (let i = 0; i < 2; i ++) {
+        let pathRow = board[spot.row], path = spot;
+        let clearA = true, clearB = false;
+        let pCol = spot.col;
+        while (pathRow !== undefined) {
+            if (clearA) {
+                path = pathRow[pCol += pDir];
+            }
+            else if (clearB) {
+                path = pathRow[spot.col];
+            }
+
+            if (path !== undefined && (clearA || clearB)) {
+                if (!path.piece) {
+                    moves.push(path);
+                }
+                else if (path.piece.black !== piece.black) {
+                    moves.push(path);
+                    clearA = false;
+                }
+                else {
+                    clearB = clearA;
+                    clearA = false;
+                }
+            }
+            if (!clearA) {
+                pathRow = board[board.indexOf(pathRow) + pDir];
+            }
+        }
+        return moves;
+    }
+
     getBishopMoves(spot) {
         let piece = spot.piece;
         let pDir = piece.black ? -1 : 1;
@@ -122,11 +169,11 @@ class Game extends React.Component {
         let board = this.state.board;
         let moves = [];
 
-        for (let i = 1; i <= 2; i++) {
+        for (let i = 0; i < 2; i++) {
             let pathRow = board[row + pDir];
             let clearA = true, clearB = true;
 
-            let pathA = board[row][col], pathB = board[row][col];
+            let pathA = spot, pathB = spot;
             let colA = col, colB = col;
             while (pathRow !== undefined) {
                 pathA = pathRow[colA += 1];
@@ -138,7 +185,6 @@ class Game extends React.Component {
                     else if (pathA.piece.black !== piece.black) {
                         moves.push(pathA);
                     }
-                    // Need check avoidance logic
                     else {
                         clearA = false;
                     }
@@ -151,7 +197,6 @@ class Game extends React.Component {
                     else if (pathB.piece.black !== piece.black) {
                         moves.push(pathB);
                     }
-                    // Need check avoidance logic
                     else {
                         clearB = false;
                     }
@@ -237,13 +282,24 @@ class Game extends React.Component {
         return moves;
     }
 
+    preventSelfCheck(moves) {
+        // Prevent self check
+    }
+
     getMoveSet(spot) {
         let piece = spot.piece;
         let type = piece.type;
         let moves = [];
         
         switch (type) {
-            case 'king': 
+            case 'king':
+                moves = this.getKingMoves(spot);
+                break;
+            case 'queen':
+                moves = this.getQueenMoves(spot);
+                break;
+            case 'rook':
+                moves = this.getRookMoves(spot);
                 break;
             case 'bishop':
                 moves = this.getBishopMoves(spot);
@@ -255,6 +311,8 @@ class Game extends React.Component {
                 moves = this.getPawnMoves(spot);
                 break;
         }
+
+        this.preventSelfCheck(moves);
         console.log(moves);
         return moves;
     }
@@ -316,7 +374,8 @@ class Game extends React.Component {
                     {this.renderRow(2)}
                     {this.renderRow(1)}
                     {this.renderRow(0)}
-                    {/* {this.renderRow(0)}
+                    {/* Black's View
+                    {this.renderRow(0)}
                     {this.renderRow(1)}
                     {this.renderRow(2)}
                     {this.renderRow(3)}
