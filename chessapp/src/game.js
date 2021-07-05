@@ -115,7 +115,7 @@ class Game extends React.Component {
 
         this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
     }
-
+ // test
     getKingMoves(spot) {
         let piece = spot.piece;
         let pDir = piece.black ? -1 : 1;
