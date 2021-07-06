@@ -78,8 +78,7 @@ class Game extends React.Component {
             type = 'bishop';
         }
         else if (j === 3) {
-            // type = 'queen';
-            return null;
+            type = 'queen';
         }
         else if (j === 4) {
             type = 'king';
@@ -118,7 +117,6 @@ class Game extends React.Component {
  
     getKingMoves(spot) {
         let piece = spot.piece;
-        // let pDir = piece.black ? -1 : 1;
         let board = this.state.board;
         let moves = [];
         
@@ -128,7 +126,7 @@ class Game extends React.Component {
             console.log(pathRow);
             while (pathRow !== undefined && j < 2) {
                 let path = pathRow[spot.col + j];
-                if (path !== undefined && i !== j !== 0) {
+                if (path !== undefined) {
                     if (!path.piece) {
                         moves.push(path);
                     }
@@ -144,12 +142,69 @@ class Game extends React.Component {
     }
 
     getQueenMoves(spot) {
-        // let piece = spot.piece;
-        // let pDir = piece.black ? -1 : 1;
-        // let board = this.state.board;
+        let piece = spot.piece;
+        let pDir = piece.black ? -1 : 1;
+        let board = this.state.board;
         let moves = [];
-        for (let i = 0; i < 2; i++) {
-            // let pathRow = 
+        for (let i = -1; i <= 1; i++) {
+            let pathRow = board[spot.row + pDir * i];
+            let path = {}, pathA = {}, pathB = {};
+            let colA = spot.col, colB = spot.col;
+            let clear = true, clearA = true, clearB = true;
+            while (pathRow !== undefined && (clearA || clearB || clear)) {
+                if (clearA) {
+                    pathA = pathRow[colA += 1];
+                }
+                if (clearB) {
+                    pathB = pathRow[colB -= 1];
+                }
+                if (clear) {
+                    path = pathRow[spot.col];
+                }
+
+                if (path !== undefined && clear) {
+                    if (!path.piece) {
+                        moves.push(path);
+                    }
+                    else {
+                        if (path.piece.black !== piece.black) {
+                            moves.push(path);
+                        }
+                        clear = false;
+                    }
+                }
+
+                if (pathA !== undefined && clearA) {
+                    if (!pathA.piece) {
+                        moves.push(pathA);
+                    }
+                    else {
+                        if (pathA.piece.black !== piece.black) {
+                            moves.push(pathA);
+                        }
+                        clearA = false;
+                    }
+                }
+                else {
+                    clearA = false;
+                }
+                
+                if (pathB !== undefined && clearB) {
+                    if (!pathB.piece) {
+                        moves.push(pathB);
+                    }
+                    else {
+                        if (pathB.piece.black !== piece.black) {
+                            moves.push(pathB);
+                        }
+                        clearB = false;
+                    }
+                }
+                else {
+                    clearB = false;
+                }
+                pathRow = board[board.indexOf(pathRow) + pDir * i];
+            }
         }
         return moves;
     }
@@ -176,11 +231,10 @@ class Game extends React.Component {
                     if (!path.piece) {
                         moves.push(path);
                     }
-                    else if (path.piece.black !== piece.black) {
-                        moves.push(path);
-                        clearA = false;
-                    }
                     else {
+                        if (path.piece.black !== piece.black) {
+                            moves.push(path);
+                        }
                         clearB = clearA;
                         clearA = false;
                     }
@@ -220,6 +274,7 @@ class Game extends React.Component {
                     }
                     else if (pathA.piece.black !== piece.black) {
                         moves.push(pathA);
+                        clearA = false;
                     }
                     else {
                         clearA = false;
@@ -232,6 +287,7 @@ class Game extends React.Component {
                     }
                     else if (pathB.piece.black !== piece.black) {
                         moves.push(pathB);
+                        clearB = false;
                     }
                     else {
                         clearB = false;
