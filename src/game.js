@@ -66,8 +66,7 @@ class Game extends React.Component {
             return null;
         }
         if (i === 1 || i === 6) {
-            // type = 'pawn';
-            return null;
+            type = 'pawn';
         }
         else if (j === 0 || j === 7) {
             type = 'rook';
@@ -79,7 +78,8 @@ class Game extends React.Component {
             type = 'bishop';
         }
         else if (j === 3) {
-            type = 'queen';
+            // type = 'queen';
+            return null;
         }
         else if (j === 4) {
             type = 'king';
@@ -115,29 +115,42 @@ class Game extends React.Component {
 
         this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
     }
- // test
+ 
     getKingMoves(spot) {
         let piece = spot.piece;
-        let pDir = piece.black ? -1 : 1;
+        // let pDir = piece.black ? -1 : 1;
         let board = this.state.board;
         let moves = [];
-
-        let pathRow = board[spot.row];
-        // for (let i = 0; i < 2; i++) {}
-        while (pathRow !== undefined) {
-
+        
+        for (let i = -1; i < 2; i++) {
+            let pathRow = board[spot.row + i];
+            let j = -1;
+            console.log(pathRow);
+            while (pathRow !== undefined && j < 2) {
+                let path = pathRow[spot.col + j];
+                if (path !== undefined && i !== j !== 0) {
+                    if (!path.piece) {
+                        moves.push(path);
+                    }
+                    else if (path.piece.black !== piece.black) {
+                        moves.push(path);
+                    }
+                }
+                j++
+            }
         }
-        // }
 
         return moves;
     }
 
     getQueenMoves(spot) {
-        let piece = spot.piece;
+        // let piece = spot.piece;
         // let pDir = piece.black ? -1 : 1;
         // let board = this.state.board;
         let moves = [];
-        //
+        for (let i = 0; i < 2; i++) {
+            // let pathRow = 
+        }
         return moves;
     }
 
