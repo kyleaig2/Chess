@@ -33,6 +33,8 @@ class Game extends React.Component {
             board: [],
             selected: {},
             whiteTurn: true,
+            blackKingSpot: {},
+            whiteKingSpot: {},
             whiteCheck: false,
             blackCheck: false,
             whiteCheckMate: false,
@@ -83,6 +85,7 @@ class Game extends React.Component {
         else if (j === 4) {
             type = 'king';
         }
+
         return {type: type, black: black, hasMoved: false};
     }
 
@@ -96,23 +99,30 @@ class Game extends React.Component {
         let validMove = false;
         if (oldSpot.piece) {
             validMove = this.getMoveSet(oldSpot).includes(newSpot);
-            if (!validMove) {
+            if (!validMove) { // Try again if invalid
                 newSpot = {};
             }
-        }
-        if (oldSpot === newSpot || (!oldSpot.piece && !newSpot.piece)) { // Deselect if same spot
-            validMove = false;
-            newSpot = {};
         }
         if (validMove) {  // Moving
             oldSpot.piece.hasMoved = true;
             newBoard[i][j].piece = oldSpot.piece;
             newBoard[oldSpot.row][oldSpot.col].piece = null;
+
+            this.setCheck(newSpot);
             newSpot = {};
             whiteTurn = !whiteTurn;
         }
 
         this.setState({board: newBoard, selected: newSpot, whiteTurn: whiteTurn});
+    }
+
+    setCheck(spot) {
+        let piece = spot.piece;
+        // let check = false;
+        // // let kingSpot = 
+        // let moves = this.getMoveSet(spot);
+
+        
     }
  
     getKingMoves(spot) {
