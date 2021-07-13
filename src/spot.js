@@ -5,7 +5,7 @@ import Piece from './pieces/piece';
 const SpotCell = styled.button(props => ({
     backgroundColor: props.black ? '#eeefff' : '#fff',
     width: '12.5%',
-    height: '8em',
+    height: '12.5vh',
     padding: '-1px',
     // border: '1px solid black',
     border: '0',
